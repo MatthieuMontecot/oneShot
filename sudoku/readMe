@@ -3,7 +3,10 @@ from the https://www.kaggle.com/bryanpark/sudoku?select=sudoku.csv page which co
 grids. Solving the entire database took me 3H30 with the largeSudoku.py script. Because of the size
 of the original data, I only kept 1000 grids to be processed here in the sudoku.csv file, but
 replacing this file by the original from kaggle and modifying the 'n' parameter in largeSudoku.py allows
-to process all grids with 100% success rate.
+to process all grids with 100% success rate. The 'cleanedSudoku.py' file is suited to solve a given specific grids instead on 
+evaluating the performances of the algorithm. To do so, you can define new exercices in the exercice.py file,
+mimicating the existing exercices (just copy, exo2 and replace the matrix by the one you want).
+This sudoku solver won't tell you if there is a mistake in the definition of the grid (if there is multiple or no solution)
 
 The way a sudoku grid is encoded is a numpy array of dimension (3,3,3,3,9) named M and containing either zeros or ones.
 In facts, a sudoky grid can be seen as a collection of 3x3 boxes arranges in a 3x3 maner. The first 4 

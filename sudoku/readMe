@@ -1,0 +1,32 @@
+This is a project about sudoku solving I made in one night. I took sudoku unsolved and solutions
+from the https://www.kaggle.com/bryanpark/sudoku?select=sudoku.csv page which consist of 1,000,000 
+grids. Solving the entire database took me 3H30 with the largeSudoku.py script. Because of the size
+of the original data, I only kept 1000 grids to be processed here in the sudoku.csv file, but
+replacing this file by the original from kaggle and modifying the 'n' parameter in largeSudoku.py allows
+to process all grids with 100% success rate.
+
+The way a sudoku grid is encoded is a numpy array of dimension (3,3,3,3,9) named M and containing either zeros or ones.
+In facts, a sudoky grid can be seen as a collection of 3x3 boxes arranges in a 3x3 maner. The first 4 
+dimensions correspond at (box abscisse in the overall grid, box ordinate of the grid in the overall grid,
+slot abscisse in the overall grid, slot ordinate of the grid in the overall grid, corresponding number)
+The last dimension correspond to numbers in the grid, first layer correspond to ones, until the last to 9. A one in the last 
+layer means that the 9 is possible. This means that if the very top left slot of the grid can, with current knowledge be 
+a 3 a 4 or a 9, the vector M[0,0,0,0] will be [0,0,1,1,0,0,0,0,1].
+
+The solving process consists of a reccursive function 'roll' which first applys logical rules (it looks at every slot that has
+only one figure allowed and deduce from it that all other slots in the same line,box or column cannot be the same number). To 
+do so, we multiply the M matrix with a 'mask' matrix containing ones everywhere except zeros in the corresponding lane, column or box
+excpet on the slot we work on (which contains a one). Then, it looks at lines columns or box that has only one slot available for a
+figure. If so, this slots should contain this figure and so, the other slots in the same line column or box are not this figure
+it get the corresponding mask and multiply element-wise M by this mask. Also, if it appears that in a given box, some number can only be on
+a given line or column, or if a given line/column, they can only be in a given box, we can deduce that they con t be in other slots in the
+line or boxes, and if the number of figures  on the intersection of a box and a line/column is exactly the number of available slots,
+we can deduce that those slots or not other digits.
+
+Finally, if after applying those rules, we don't improve our knowledge (if the number of ones in M is stable), we can do some hypothesis:
+we store M, then modify it selecting a slot and assuming it's a given possible value, then we call reccursivly the roll function on this modifyied M.
+If some incoherence is detected, we know that the corresponding hypothesis was wrong and we can put a zero to the corresponding layer in
+this slot and try other hypothesis and then reapply the logical rules from above.
+If needed, the recursivity of the roll function allows to take several hypothesis, with a maximum depth as an hyperparameter (default is 5 which seems to be
+enough since it works on 1 million sudokus with perfect success rate. Also, we order hypothesis such that we try first the ones one slots that has the less
+possibilities left in order to fasten the resolution.

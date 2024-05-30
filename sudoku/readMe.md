@@ -1,6 +1,6 @@
 # sudoku project sum up:
 This is a project about sudoku solving I made in one night. I took sudoku unsolved and solutions
-from the https://www.kaggle.com/bryanpark/sudoku?select=sudoku.csv page which consist of 1,000,000 
+from the https://www.kaggle.com/bryanpark/sudoku?select=sudoku.csv database which consist of 1,000,000 
 grids. Solving the entire database took me 3H30 with the solver.py scipt with 100% success rate. 
 
 # how to use

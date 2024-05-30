@@ -1,5 +1,12 @@
+# carLearning presentation
 This project consist of generating a population of self driving cars in some course and make this population evolve to make offsprings
 able to do the complete course efficiently. A demo can be viewed on a typical generation after 30 generations.
+
+/!\ I coded this in 2020 during quarantine, I didn't maintain it and it lacks a lot of optimization
+Everythin from genetic algorithm, neural network representation, collision detection and physics engine is implemented from scratch.
+This implementation lacks tons of opimizations, thus I recommend just having a look at the video I uploaded as a deli.
+
+# additional thoughts
 
 The input of the NN is 5 numbers corresponding to the distance with the first wall on a given direction (the distance of sight).
 The approche is to use simple feed forward neural networks with entry 5, 2 hidden layers of size 4 and 3 and the output layer of size 2,

@@ -51,10 +51,4 @@ python solver.py -v -o sudoku.csv -d solution.csv
 
 # additional comments:
 
-The way a sudoku grid is encoded before solving is a numpy array of dimension (3,3,3,3,9) named M and containing either zeros or ones.<br>
-In facts, a sudoky grid can be seen as a collection of 3x3 boxes arranges in a 3x3 maner. The first 4 <br>
-dimensions correspond at (box abscisse in the overall grid, box ordinate of the grid in the overall grid,<br>
-slot abscisse in the overall grid, slot ordinate of the grid in the overall grid, corresponding number)<br>
-The last dimension correspond to numbers in the grid, first layer correspond to ones, until the last to 9. A one in the last <br>
-layer means that the 9 is possible. This means that if the very top left slot of the grid can, with current knowledge be <br>
-a 3 a 4 or a 9, the vector M[0,0,0,0] (top left slot) will be [0,0,1,1,0,0,0,0,1].
+The way a sudoku grid is encoded before solving is a numpy array of dimension (3,3,3,3,9) named M and containing either zeros or ones. In facts, a sudoku grid can be seen as a collection of 3x3 boxes arranges in a 3x3 maner. The first 4 dimensions corresponding to (box abscisse in the overall grid, box ordinate of the grid in the overall grid, slot abscisse in the overall grid, slot ordinate of the grid in the overall grid, corresponding number). The last dimension correspond to numbers in the grid, first layer correspond to ones, until the last to 9. A one in the last layer means that the 9 is possible. This means that if the very top left slot of the grid can, with current knowledge be a 3 a 4 or a 9, the vector M[0,0,0,0] (top left slot) will be [0,0,1,1,0,0,0,0,1].

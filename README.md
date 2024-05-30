@@ -11,3 +11,6 @@ The simulation runs at roughtly 70 frames per seconds using the pygame library t
 The collision detection system, the neural network creation the offspring generation, the physics engine and the display
 of the race are coded from scratch using numpy and pygame libraries.
 I'm adapting the readme 4 years later and I know tons of optimizations it would require, also it would require to create a real racing circuit.
+
+
+/!\ I finished this implementation in 2020, I didn't take time to comment and format correctly the code in my young years.

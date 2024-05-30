@@ -52,7 +52,7 @@ if __name__ == "__main__":
                     worked, M = sl.roll(M,5)
                     if args.v:
                         sl.plot(M)
-                        input('next')
+                        input('please press enter for next grid')
                     dest_file.write(s + ',' + sl.from_M_to_s(M) + '\n')
     else:
         if not args.o is None:
@@ -67,5 +67,5 @@ if __name__ == "__main__":
                     sl.plot(M)
                     worked, M = sl.roll(M,5)
                     sl.plot(M)
-                    input('next')
+                    input('please press enter for next grid')
             

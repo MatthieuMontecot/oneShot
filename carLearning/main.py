@@ -2,8 +2,6 @@ import numpy as np
 import pygame
 import sys
 import time
-from sklearn.preprocessing import normalize
-from scipy.special import expit
 import pickle
 import argparse
 import level_design as ld

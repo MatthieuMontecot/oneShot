@@ -64,8 +64,10 @@ if __name__ == "__main__":
                     s = line[:81]
                     sl.fill_M_with_s(N, s)
                     M = ex.createM(np.transpose(N))
-                    sl.plot(M)
+                    if args.v:
+                        sl.plot(M)
                     worked, M = sl.roll(M,5)
-                    sl.plot(M)
-                    input('please press enter for next grid')
+                    if args.v:
+                        sl.plot(M)
+                        input('please press enter for next grid')
             

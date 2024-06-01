@@ -50,7 +50,7 @@ if __name__ == '__main__':
             print(f"max score (divided by the epoch duration, which increases:): {population.scores.max()/score_scaler}")
             population.reset()
             population.selection_pressure += 0.1
-        print(f'generation {e} with {len(set([id(pop_element) for pop_element in population.population]))}')
+        print(f'generation {e}')
         if args.hide is None:
             clock.tick(FPS)
         frame = 0

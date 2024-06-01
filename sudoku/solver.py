@@ -58,7 +58,7 @@ if __name__ == "__main__":
         if not args.o is None:
             N = np.zeros((9, 9), np.uint32)
             with open(args.o, "r") as origin_file:
-                for i, line in enumerate(origin_file):
+                for i, line in tqdm.tqdm(enumerate(origin_file)):
                     if i == 0:
                         continue
                     s = line[:81]

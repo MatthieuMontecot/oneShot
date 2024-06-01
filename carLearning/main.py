@@ -25,6 +25,8 @@ args = parser.parse_args()
 
 if args.e is None:
     args.e = 100
+else:
+    args.e = int(args.e)
 if args.t is None:
     args.t = 1000
 FPS = 80

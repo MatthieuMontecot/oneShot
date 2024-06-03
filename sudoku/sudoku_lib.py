@@ -1,201 +1,237 @@
 import numpy as np
 import exercices as ex
 
+
 def load_friendly(filename):
     with open(filename, "r") as file:
         lines = file.readlines()
-        quizzes = np.zeros((9,9), np.int32)
+        quizzes = np.zeros((9, 9), np.int32)
         for i, line in enumerate(lines):
             quizzes[i] = [int(c) for c in line.split(',')[:9]]
-        M = ex.createM(np.transpose(quizzes))
-    return M
+        grid = ex.create_grid(np.transpose(quizzes))
+    return grid
 
-def fill_M_with_s(M, s):
-    assert(len(s) == 81)
+
+def fill_grid_with_s(grid, s):
+    assert (len(s) == 81)
     for i in range(9):
-        M[i] = [int(c) for c in s[9 * i: 9 * (i + 1)]]
+        grid[i] = [int(c) for c in s[9 * i: 9 * (i + 1)]]
 
-def from_M_to_s(M):
-    A=np.sum(M,axis=-1)
+
+def from_grid_to_s(grid):
+    sum_grid = np.sum(grid, axis=-1)
     s = ''
     for b in range(3):
         for d in range(3):
             for a in range(3):
                 for c in range(3):
-                    if A[a,b,c,d]==1:
-                        k=np.where(M[a,b,c,d]==1)
-                        s+=str(k[0][0]+1)
+                    if sum_grid[a, b, c, d] == 1:
+                        k = np.where(grid[a, b, c, d] == 1)
+                        s += str(k[0][0] + 1)
                     else:
-                        s+='0'
+                        s += '0'
     return s
-    
-    
-def plot(M):
-    A=np.sum(M,axis=-1)
+
+
+def plot(grid):
+    sum_grid = np.sum(grid, axis=-1)
     print('_____________')
     for b in range(3):
         for d in range(3):
-            s=''
+            s = ''
             for a in range(3):
                 for c in range(3):
-                    if A[a,b,c,d]==1:
-                        k=np.where(M[a,b,c,d]==1)
-                        s+=str(k[0][0]+1)
+                    if sum_grid[a, b, c, d] == 1:
+                        k = np.where(grid[a, b, c, d] == 1)
+                        s += str(k[0][0] + 1)
                     else:
-                        s+='X'
+                        s += 'X'
                 if a < 2:
                     s += ','
             print(s)
-        if b <2:
+        if b < 2:
             print('------------')
     print('_____________')
-    
-def roll(M,depth=1):
-    '''temporary bit'''
-    loop=1
-    sumM=-5
-    newA=1
-    newC=1
-    savingM=M
-    while loop:
-        loop=0
-        while sumM!=np.sum(M):
-            sumM=np.sum(M)
-            A=np.sum(M,axis=-1)
-            if 0 in A:
-                break
-            if newA==1:
-                Aprime=A
-                newA=0
-                a,b,c,d=np.where(A==1)
-            else:
-                a,b,c,d=np.where(A*(Aprime!=A)==1)
-            for f,g,h,i in zip(a,b,c,d):
-                k=np.where(M[f,g,h,i]==1)[0]
-                mask=ex.getMask(f,g,h,i,k)
-                M=M*mask
-#etape B:
-            detectHorizontaly=np.sum(M,axis=(0,2))
-            boxesLines,lines,ks=np.where(detectHorizontaly==1)
-            for yBox,k,line in zip(boxesLines.flatten(),ks.flatten(),lines.flatten()):
-                abscisseBoxes,abscisses,=np.where(M[:,yBox,:,line,k]==1)
-                if len(abscisseBoxes)!=0:
-                    mask=ex.getMask(abscisseBoxes[0],yBox,abscisses[0],line,k)
-                    M=M*mask
-        
-            detectVerticaly=np.sum(M,axis=(1,3))
-            boxesColumns,columns,ks=np.where(detectVerticaly==1)
-            for xBox,k,column in zip(boxesColumns.flatten(),ks.flatten(),columns.flatten()):    
-                columnBoxes,ys,=np.where(M[xBox,:,column,:,k]==1)
-                if len(columnBoxes)!=0:
-                    mask=ex.getMask(xBox,columnBoxes[0],column,ys[0],k)
-                    M=M*mask
-#etapeC:
-            if newC:
-                interL=np.empty((9,9),dtype=set)
-                interC=np.empty((9,9),dtype=set)
-                numL=np.empty((9,9),dtype='int32')
-                numC=np.empty((9,9),dtype='int32')
-                newC=0
-            for Bx in range(3):
-                for By in range(3):
-                    for Lx in range(3):
-                        C=3*Bx+Lx
-                        B=Bx+3*By
-                        Atemp=M[Bx,By,Lx]
-                        Afilter=np.sum(Atemp,axis=-1).reshape((3,1))
-                        Atemp=Atemp*(Afilter!=1)
-                
-                        j,k=np.where(Atemp==1)
-                        j=set(j)
-                        possibilities=set(k)
-                        numC[B,C]=len(j)
-                        interC[B,C]=possibilities
-                    for Ly in range(3):
-                        L=3*By+Ly
-                        B=Bx+3*By
-                        Atemp=M[Bx,By,:,Ly]
-                        Afilter=np.sum(Atemp,axis=-1).reshape((3,1))
-                        Atemp=Atemp*(Afilter!=1)
-                        j,k=np.where(Atemp==1)
-                        j=set(j)
-                        possibilities=set(k)
-                        numL[B,L]=len(j)
-                        interL[B,L]=possibilities
 
-            AC=np.sum(M,axis=-1)
-            if 0 in AC:
+
+def roll(grid, depth=1):
+    """temporary bit"""
+    sum_grid_prime = None
+    intersection_box_column_counter_array = None  # a (9,9) array about the intersection size between a box number 
+    # and a column number 
+    intersection_box_line_counter_array = None  # a (9,9) array about the intersection size between a box number and 
+    # a line number 
+    intersection_box_column_set_array = None  # a (9,9) array about the intersection set between a box number and
+    # a column number
+    intersection_box_line_set_array = None  # a (9,9) array about the intersection set between a box number and
+    # a line number
+    loop = True
+    total_sum_grid = -5
+    is_new_sum_grid = 1
+    is_not_static_column = 1
+    grid_checkpoint = grid
+    while loop:
+        loop = False
+        while total_sum_grid != np.sum(grid):
+            total_sum_grid = np.sum(grid)
+            sum_grid = np.sum(grid, axis=-1)
+            if 0 in sum_grid:
+                break
+            if is_new_sum_grid == 1:
+                sum_grid_prime = sum_grid
+                is_new_sum_grid = 0
+                a, b, c, d = np.where(sum_grid == 1)
+            else:
+                a, b, c, d = np.where(sum_grid * (sum_grid_prime != sum_grid) == 1)
+            for f, g, h, i in zip(a, b, c, d):
+                k = np.where(grid[f, g, h, i] == 1)[0]
+                mask = ex.get_mask(f, g, h, i, k)
+                grid = grid * mask
+            detect_on_columns = np.sum(grid, axis=(0, 2))
+            boxes_lines, lines, ks = np.where(detect_on_columns == 1)
+            for yBox, k, line in zip(boxes_lines.flatten(), ks.flatten(), lines.flatten()):
+                boxes_abscissa, abscissa, = np.where(grid[:, yBox, :, line, k] == 1)
+                if len(boxes_abscissa) != 0:
+                    mask = ex.get_mask(boxes_abscissa[0], yBox, abscissa[0], line, k)
+                    grid = grid * mask
+
+            detect_on_lines = np.sum(grid, axis=(1, 3))
+            boxes_columns, columns, ks = np.where(detect_on_lines == 1)
+            for xBox, k, column in zip(boxes_columns.flatten(), ks.flatten(), columns.flatten()):
+                boxes_column, ys, = np.where(grid[xBox, :, column, :, k] == 1)
+                if len(boxes_column) != 0:
+                    mask = ex.get_mask(xBox, boxes_column[0], column, ys[0], k)
+                    grid = grid * mask
+            if is_not_static_column:
+                intersection_box_line_set_array = np.empty((9, 9), dtype=set)
+                intersection_box_column_set_array = np.empty((9, 9), dtype=set)
+                intersection_box_line_counter_array = np.empty((9, 9), dtype='int32')
+                intersection_box_column_counter_array = np.empty((9, 9), dtype='int32')
+                is_not_static_column = 0
+            for Bx in range(3):
+                for By in range(3):
+                    for Lx in range(3):
+                        flat_column_number = 3 * Bx + Lx
+                        flat_box_number = Bx + 3 * By
+                        temporary_sub_column_array = grid[Bx, By, Lx]
+                        temporary_filter = np.sum(temporary_sub_column_array, axis=-1).reshape((3, 1))
+                        temporary_sub_column_array = temporary_sub_column_array * (temporary_filter != 1)
+                        j, k = np.where(temporary_sub_column_array == 1)
+                        j = set(j)
+                        possibilities = set(k)
+                        intersection_box_column_counter_array[flat_box_number, flat_column_number] = len(j)
+                        intersection_box_column_set_array[flat_box_number, flat_column_number] = possibilities
+                    for Ly in range(3):
+                        flat_line_number = 3 * By + Ly
+                        flat_box_number = Bx + 3 * By
+                        temporary_sub_line_array = grid[Bx, By, :, Ly]
+                        temporary_filter = np.sum(temporary_sub_line_array, axis=-1).reshape((3, 1))
+                        temporary_sub_line_array = temporary_sub_line_array * (temporary_filter != 1)
+                        j, k = np.where(temporary_sub_line_array == 1)
+                        j = set(j)
+                        possibilities = set(k)
+                        intersection_box_line_counter_array[flat_box_number, flat_line_number] = len(j)
+                        intersection_box_line_set_array[flat_box_number, flat_line_number] = possibilities
+
+            sum_grid = np.sum(grid, axis=-1)
+            if 0 in sum_grid:
                 break
             for Bx in range(3):
                 for By in range(3):
                     for Lx in range(3):
-                        C=3*Bx+Lx
-                        B=Bx+3*By
-                        if numC[B,C]==len(interC[B,C]):
-                            yCoordinates,=np.where(AC[Bx,By,Lx]!=1)
-                            if len(yCoordinates)==0 or len(interC[B,C])==0:
+                        flat_column_number = 3 * Bx + Lx
+                        flat_box_number = Bx + 3 * By
+                        if intersection_box_column_counter_array[flat_box_number,
+                                                                 flat_column_number] == \
+                                len(intersection_box_column_set_array[flat_box_number, flat_column_number]):
+                            y_coordinates, = np.where(sum_grid[Bx, By, Lx] != 1)
+                            if len(y_coordinates) == 0 or \
+                                    len(intersection_box_column_set_array[flat_box_number, flat_column_number]) == 0:
                                 continue
-                            M[np.ix_([Bx],[By],range(3),range(3),list(interC[B,C]))]=np.zeros((1,1,3,3,len(list(interC[B,C]))))
-                            M[np.ix_([Bx],range(3),[Lx],range(3),list(interC[B,C]))]=np.zeros((1,3,1,3,len(list(interC[B,C]))))
-                            M[np.ix_([Bx],[By],[Lx],yCoordinates,list(interC[B,C]))]=np.ones([len(yCoordinates),len(list(interC[B,C]))]).reshape((1,1,1,len(yCoordinates),len(list(interC[B,C]))))
+                            grid[np.ix_([Bx], [By], range(3), range(3),
+                                        list(intersection_box_column_set_array[flat_box_number,
+                                                                               flat_column_number]))] = np.zeros(
+                                (1, 1, 3, 3, len(list(intersection_box_column_set_array[flat_box_number,
+                                                                                        flat_column_number]))))
+                            grid[np.ix_([Bx], range(3), [Lx], range(3),
+                                        list(intersection_box_column_set_array[flat_box_number,
+                                                                               flat_column_number]))] = np.zeros(
+                                (1, 3, 1, 3, len(list(intersection_box_column_set_array[flat_box_number,
+                                                                                        flat_column_number]))))
+                            grid[np.ix_([Bx], [By], [Lx], y_coordinates,
+                                        list(intersection_box_column_set_array[flat_box_number,
+                                                                               flat_column_number]))] = np.ones(
+                                [len(y_coordinates),
+                                 len(list(intersection_box_column_set_array[flat_box_number,
+                                                                            flat_column_number]))]).reshape(
+                                (1, 1, 1, len(y_coordinates),
+                                 len(list(intersection_box_column_set_array[flat_box_number, flat_column_number]))))
                     for Ly in range(3):
-                        L=3*By+Ly
-                        B=Bx+3*By
-                        if numL[B,L]==len(interL[B,L]):
-                            xCoordinates,=np.where(AC[Bx,By,:,Ly]!=1)
-                            if len(xCoordinates)==0 or len(interL[B,L])==0:
+                        flat_line_number = 3 * By + Ly
+                        flat_box_number = Bx + 3 * By
+                        if intersection_box_line_counter_array[flat_box_number,
+                                                               flat_line_number] == \
+                                len(intersection_box_line_set_array[flat_box_number, flat_line_number]):
+                            x_coordinates, = np.where(sum_grid[Bx, By, :, Ly] != 1)
+                            if len(x_coordinates) == 0 or len(intersection_box_line_set_array[flat_box_number,
+                                                                                              flat_line_number]) == 0:
                                 continue
-                            M[np.ix_([Bx],[By],range(3),range(3),list(interL[B,L]))]=np.zeros((1,1,3,3,len(list(interL[B,L]))))
-                            M[np.ix_(range(3),[By],range(3),[Ly],list(interL[B,L]))]=np.zeros((3,1,3,1,len(list(interL[B,L]))))
-                            M[np.ix_([Bx],[By],xCoordinates,[Ly],list(interL[B,L]))]=np.ones([len(xCoordinates),len(list(interL[B,L]))]).reshape((1,1,len(xCoordinates),1,len(list(interL[B,L]))))
-        A=np.sum(M,axis=-1)
-        detectHorizontaly=np.sum(M,axis=(0,2))
-        detectVerticaly=np.sum(M,axis=(1,3))
+                            grid[np.ix_([Bx], [By], range(3), range(3),
+                                        list(intersection_box_line_set_array[flat_box_number,
+                                                                             flat_line_number]))] = np.zeros(
+                                (1, 1, 3, 3, len(list(intersection_box_line_set_array[flat_box_number,
+                                                                                      flat_line_number]))))
+                            grid[np.ix_(range(3), [By], range(3), [Ly],
+                                        list(intersection_box_line_set_array[flat_box_number,
+                                                                             flat_line_number]))] = np.zeros(
+                                (3, 1, 3, 1, len(list(intersection_box_line_set_array[flat_box_number,
+                                                                                      flat_line_number]))))
+                            grid[np.ix_([Bx], [By], x_coordinates, [Ly],
+                                        list(intersection_box_line_set_array[flat_box_number,
+                                                                             flat_line_number]))] = np.ones(
+                                [len(x_coordinates),
+                                 len(list(intersection_box_line_set_array[flat_box_number,
+                                                                          flat_line_number]))]).reshape(
+                                (1, 1, len(x_coordinates), 1,
+                                    len(list(intersection_box_line_set_array[flat_box_number, flat_line_number]))))
+        sum_grid = np.sum(grid, axis=-1)
+        detect_on_columns = np.sum(grid, axis=(0, 2))
+        detect_on_lines = np.sum(grid, axis=(1, 3))
         for i in range(3):
             for j in range(3):
-                B=np.sum(M[i,j],axis=(0,1))
-                if 0 in B:
-                    return(-1,savingM)
-        if 0 in A or 0 in detectHorizontaly or 0 in detectVerticaly:
-            return(-1,savingM)
-        if depth==0:
-            return(0,savingM)
-            return(1,M)
-        dirtyM=M
-        savingSum2=np.sum(M)
-        A=np.sum(M,axis=-1)
-        hypothesis=np.where(A!=1)
-        aL,bL,cL,dL=hypothesis
-        aL=list(aL)
-        bL=list(bL)
-        cL=list(cL)
-        dL=list(dL)
-        values=A[hypothesis[0],hypothesis[1],hypothesis[2],hypothesis[3]].tolist()
-        #values=A.tolist()
-        while len(values)!=0:
-            xMin=np.argmin(values)
-            a=aL.pop(xMin)
-            b=bL.pop(xMin)
-            c=cL.pop(xMin)
-            d=dL.pop(xMin)
-            values.pop(xMin)
-            #une remarque est nécessaire ici: on traite les valeurs ici sur une case (celle qui a le moins de possibilités)
-            #il se peutdonc que la derniere valeur traitée soit forcée par elimination des autres et en soit déductible
-            #elle sera ici malgré tout considéré comme une hypothese et ca impactera la profondeur maximale de l'arbre des recherches.
-            kL=np.where(M[a,b,c,d]==1)[0]
-            for key in kL:
-                mask=ex.getMask(a,b,c,d,key)
-                dirtyM=dirtyM*mask
-                #print('hypothese (',3*a+c,',',3*b+d,')=',key)
-                worked,M2=roll(dirtyM,depth-1)
-                if worked==1:
-                    #print('testing hypothese (',3*a+c,',',3*b+d,')=',key)
-                    #print('worked',np.sum(M))  
-                    return(worked,M2)
-                if worked==-1:
-                    #print('failed')
-                    M[a,b,c,d,key]=0
-                    values=[]
-                    loop=1
+                sum_over_boxes_array = np.sum(grid[i, j], axis=(0, 1))
+                if 0 in sum_over_boxes_array:
+                    return -1, grid_checkpoint
+        if 0 in sum_grid or 0 in detect_on_columns or 0 in detect_on_lines:
+            return -1, grid_checkpoint
+        if depth == 0:
+            return 0, grid_checkpoint
+        dirty_grid = grid
+        sum_grid = np.sum(grid, axis=-1)
+        hypothesis = np.where(sum_grid != 1)
+        box_column_hypothesis, box_line_hypothesis, sub_column_hypothesis, sub_line_hypothesis = hypothesis
+        box_column_hypothesis = list(box_column_hypothesis)
+        box_line_hypothesis = list(box_line_hypothesis)
+        sub_column_hypothesis = list(sub_column_hypothesis)
+        sub_line_hypothesis = list(sub_line_hypothesis)
+        values = sum_grid[hypothesis[0], hypothesis[1], hypothesis[2], hypothesis[3]].tolist()
+        while len(values) != 0:
+            x_min = np.argmin(values)
+            a = box_column_hypothesis.pop(x_min)
+            b = box_line_hypothesis.pop(x_min)
+            c = sub_column_hypothesis.pop(x_min)
+            d = sub_line_hypothesis.pop(x_min)
+            values.pop(x_min)
+            possible_key_list = np.where(grid[a, b, c, d] == 1)[0]
+            for key in possible_key_list:
+                mask = ex.get_mask(a, b, c, d, key)
+                dirty_grid = dirty_grid * mask
+                worked, next_step_grid = roll(dirty_grid, depth - 1)
+                if worked == 1:
+                    return worked, next_step_grid
+                if worked == -1:
+                    grid[a, b, c, d, key] = 0
+                    values = []
+                    loop = True
                     break
-    return(0,M)
+    return 0, grid

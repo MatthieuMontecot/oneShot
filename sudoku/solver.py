@@ -31,8 +31,8 @@ if __name__ == "__main__":
     if args.s is not None:
         try:
             assert (len(args.s) == 81)
-        except:
-            raise Exception(f"input string length should be 81, received {len(args.s)}")
+        except WrongStringSudokuFormat:
+            print(f"input string length should be 81, received {len(args.s)}")
         grid = np.zeros((9, 9), np.uint32)
         sl.fill_grid_with_s(grid, args.s)
         grid = ex.createM(np.transpose(grid))
@@ -48,8 +48,8 @@ if __name__ == "__main__":
         N = np.zeros((9, 9), np.uint32)
         try:
             assert not os.path.exists(args.d)
-        except:
-            raise Exception("destination file already exists, please chose a non existing destination path")
+        except DestinationFileAlreadyExisting:
+            print("destination file already exists, please chose a non existing destination path")
         with open(args.d, 'w') as destination_file:
             with open(args.o, "r") as origin_file:
                 destination_file.write("quizzes, solution" + '\n')
@@ -58,14 +58,14 @@ if __name__ == "__main__":
                         continue
                     s = line[:81]
                     sl.fill_grid_with_s(N, s)
-                    grid = ex.createM(np.transpose(N))
+                    grid = ex.create_grid(np.transpose(N))
                     if args.v:
                         sl.plot(grid)
                     worked, grid = sl.roll(grid, 5)
                     if args.v:
                         sl.plot(grid)
                         input('please press enter for next grid')
-                    dest_file.write(s + ',' + sl.from_grid_to_s(grid) + '\n')
+                    destination_file.write(s + ',' + sl.from_grid_to_s(grid) + '\n')
     else:
         if args.o is not None:
             N = np.zeros((9, 9), np.uint32)

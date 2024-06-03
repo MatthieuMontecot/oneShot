@@ -87,6 +87,4 @@ if __name__ == "__main__":
                     if args.v:
                         sl.plot(grid)
                         input('please press enter for next grid')
-                    if i % 1000 == 0 and i != 0:
-                        tqdm.tqdm.write(f"""success rate:{evaluator(succeeded_grids, failed_grids)}
-                            (updated every 1000 grids)""")
+            print(f"success rate:{evaluator(succeeded_grids, failed_grids)}")
